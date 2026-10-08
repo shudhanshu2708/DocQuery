@@ -1,0 +1,77 @@
+[
+  {
+    "id": 1,
+    "question": "What is an API?",
+    "expected": "An API is an Application Programming Interface that allows different software systems to communicate with each other."
+  },
+  {
+    "id": 2,
+    "question": "What are the four types of APIs?",
+    "expected": "SOAP, GraphQL, gRPC, and WebSockets."
+  },
+  {
+    "id": 3,
+    "question": "What is GraphQL?",
+    "expected": "GraphQL is an API technology that allows clients to request the specific data they need."
+  },
+  {
+    "id": 4,
+    "question": "What is gRPC used for?",
+    "expected": "gRPC is used for efficient communication between services, especially in distributed systems and microservices."
+  },
+  {
+    "id": 5,
+    "question": "What are WebSockets used for?",
+    "expected": "WebSockets are used for real-time, two-way communication between a client and server."
+  },
+  {
+    "id": 6,
+    "question": "What is the difference between PUT and PATCH?",
+    "expected": "PUT is generally used to replace or update an entire resource, while PATCH is used for partial updates."
+  },
+  {
+    "id": 7,
+    "question": "What is a path parameter?",
+    "expected": "A path parameter is a value included in the URL path to identify a specific resource."
+  },
+  {
+    "id": 8,
+    "question": "What is a query parameter?",
+    "expected": "A query parameter is a parameter included in the URL after a question mark and is commonly used for filtering or optional parameters."
+  },
+  {
+    "id": 9,
+    "question": "What is a request body?",
+    "expected": "A request body contains data sent by the client to the server, commonly in JSON format."
+  },
+  {
+    "id": 10,
+    "question": "What is the difference between nested data and filtering?",
+    "expected": "Nested data represents related or hierarchical information, while filtering is used to retrieve only data matching specified conditions."
+  },
+  {
+    "id": 11,
+    "question": "What is the booking confirmation request flow?",
+    "expected": "The client sends a request to update the booking, the server processes the request, and the server returns the appropriate response."
+  },
+  {
+    "id": 12,
+    "question": "What is the difference between HTTP 401 and 403?",
+    "expected": "401 indicates that authentication is required or invalid, while 403 indicates that the client is authenticated but does not have permission to access the resource."
+  },
+  {
+    "id": 13,
+    "question": "What status code should be returned when a resource is missing?",
+    "expected": "404 Not Found."
+  },
+  {
+    "id": 14,
+    "question": "What are HTTP methods?",
+    "expected": "HTTP methods define the action a client wants to perform on a resource, such as GET, POST, PUT, PATCH, and DELETE."
+  },
+  {
+    "id": 15,
+    "question": "What hashing algorithm should be used for passwords?",
+    "expected": "I don't know based on the document."
+  }
+]
