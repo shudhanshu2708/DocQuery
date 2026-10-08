@@ -1,107 +1,180 @@
-# DocQuery
+# DocQuery 📄
 
-A Retrieval-Augmented Generation (RAG) backend that lets you upload PDF documents and ask natural-language questions about their content. Built with FastAPI, LangChain, ChromaDB, and Ollama for fully local inference (no external API keys required).
+DocQuery is a RAG-based (Retrieval-Augmented Generation) PDF question answering system. Upload a PDF, ask questions in plain language, and get answers grounded in the document, along with the source chunks they came from.
 
-## How it works
+## ✨ Features
 
+- PDF upload with validation (PDF files only)
+- Safe handling of empty or unreadable PDFs
+- Recursive text chunking (1000 characters, 200 overlap)
+- Local embeddings using Ollama (`nomic-embed-text`)
+- Persistent vector storage with ChromaDB
+- MMR (Maximal Marginal Relevance) retrieval for diverse, relevant context
+- Answer generation using Groq (`openai/gpt-oss-20b`)
+- Source metadata returned with every answer
+- Strict document-only answering: if the answer isn't in the PDF, it replies
+  *"I don't know based on the document."*
+- Graceful handling of Groq rate limits (HTTP 429)
+- Simple web UI
+- Interactive API docs via Swagger
+- Basic evaluation scripts for testing
+
+## 🛠️ Tech Stack
+
+| Layer | Technologies |
+|-------|--------------|
+| **Backend** | Python, FastAPI |
+| **RAG** | LangChain |
+| **LLM** | Groq (`openai/gpt-oss-20b`) |
+| **Embeddings** | Ollama (`nomic-embed-text`) |
+| **Vector Database** | ChromaDB |
+| **PDF Parsing** | pypdf |
+| **Frontend** | HTML, CSS, JavaScript |
+| **Config** | python-dotenv |
+
+## 🏗️ Architecture
+
+```text
+PDF
+ ↓
+Text Extraction (pypdf)
+ ↓
+Chunking (1000 / 200 overlap)
+ ↓
+Embeddings (Ollama: nomic-embed-text)
+ ↓
+ChromaDB
+ ↓
+MMR Retrieval
+ ↓
+Groq LLM
+ ↓
+Answer + Sources
 ```
-PDF Upload → Text Extraction → Chunking → Embeddings → ChromaDB (vector store)
-                                                              ↓
-User Question → Semantic Retrieval → Context + Question → LLM → Answer
-```
 
-1. **Upload** — a PDF is parsed and its text extracted using `pypdf`.
-2. **Chunking** — text is split into overlapping chunks using LangChain's `RecursiveCharacterTextSplitter`, so context isn't lost at chunk boundaries.
-3. **Embedding & storage** — each chunk is embedded (`nomic-embed-text` via Ollama) and stored in a persistent ChromaDB vector store.
-4. **Retrieval** — when a question comes in, the most semantically relevant chunks are retrieved from ChromaDB.
-5. **Generation** — the retrieved chunks are passed as context to a local LLM (`llama3.2:3b` via Ollama) using an LCEL (LangChain Expression Language) pipeline, which generates a grounded answer.
+## 📁 Project Structure
 
-## Tech Stack
-
-- **Backend:** FastAPI
-- **LLM & Embeddings:** Ollama (`llama3.2:3b`, `nomic-embed-text`) — runs fully locally
-- **Orchestration:** LangChain (LCEL-based retrieval chain)
-- **Vector Store:** ChromaDB
-- **PDF Parsing:** pypdf
-- **Frontend:** Vanilla HTML/CSS/JS (no build step), served directly by FastAPI
-
-## Project Structure
-
-```
-RAG-Service/
+```text
+DocQuery/
 ├── app/
-│   ├── main.py              # FastAPI app, upload/count endpoints, chunking logic
-│   ├── routes/
-│   │   └── ask.py           # /ask endpoint — retrieval + generation pipeline
-│   └── core/
-│       └── vectorstore.py   # ChromaDB + embeddings setup
+│   ├── main.py
+│   ├── core/
+│   │   └── vectorstore.py
+│   └── routes/
+│       └── ask.py
+├── evaluation/
+│   ├── questions.json
+│   └── evaluate.py
 ├── static/
-│   └── index.html           # Minimal upload + ask UI
-├── uploads/                 # Uploaded PDFs (gitignored)
-├── chroma_db/                # Persisted vector store (gitignored)
-└── requirements.txt
+│   └── index.html
+├── .env.example
+├── .gitignore
+├── requirements.txt
+└── README.md
 ```
 
-## Setup
+## 🚀 Getting Started
 
 ### Prerequisites
+
 - Python 3.10+
-- [Ollama](https://ollama.com) installed and running locally
+- [Ollama](https://ollama.com) installed and running
+- A [Groq](https://console.groq.com) API key
 
-### 1. Clone and set up a virtual environment
+### Installation
+
 ```bash
-git clone https://github.com/shudhanshu2708/RAG-Service.git
-cd RAG-Service
+git clone https://github.com/shudhanshu2708/DocQuery.git
+cd DocQuery
+
+# Create and activate a virtual environment
 python -m venv venv
-venv\Scripts\activate        # Windows
-# source venv/bin/activate   # macOS/Linux
-```
+venv\Scripts\activate           # Windows
+# source venv/bin/activate      # macOS / Linux
 
-### 2. Install dependencies
-```bash
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 3. Pull the required Ollama models
+### Pull the embedding model
+
 ```bash
-ollama pull llama3.2:3b
 ollama pull nomic-embed-text
 ```
 
-### 4. Run the server
+### Configure environment variables
+
+Copy `.env.example` to `.env` and add your Groq API key:
+
+```bash
+cp .env.example .env
+```
+
+```env
+GROQ_API_KEY=your_groq_api_key_here
+```
+
+### Run the server
+
 ```bash
 uvicorn app.main:app --reload
 ```
 
-### 5. Open the app
-Visit `http://127.0.0.1:8000/` in your browser for the upload + ask UI, or `http://127.0.0.1:8000/docs` for the interactive Swagger API docs.
+- Web UI: `http://localhost:8000`
+- Swagger docs: `http://localhost:8000/docs`
 
-## API Endpoints
+## 📡 API Endpoints
 
-| Method | Endpoint  | Description                                  |
-|--------|-----------|-----------------------------------------------|
-| GET    | `/`       | Serves the frontend UI                        |
-| POST   | `/upload` | Upload a PDF; extracts, chunks, and stores it  |
-| GET    | `/count`  | Returns total number of chunks stored          |
-| POST   | `/ask`    | Ask a question; returns an answer + sources    |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/` | Web UI |
+| `POST` | `/upload` | Upload and index a PDF |
+| `POST` | `/ask` | Ask a question, returns answer and sources |
+| `GET` | `/count` | Number of chunks stored in the vector database |
 
-**Example — `/ask` request body:**
-```json
-{ "question": "What is the main topic of the document?" }
+### Example
+
+```bash
+curl -X POST http://localhost:8000/ask \
+  -H "Content-Type: application/json" \
+  -d '{"question": "What is the main topic of this document?"}'
 ```
 
-**Example — `/ask` response:**
 ```json
 {
   "answer": "...",
-  "sources": [{ "source": "example.pdf", "chunk_index": 3 }]
+  "sources": [
+    { "page": 1, "content": "..." }
+  ]
 }
 ```
 
-## Status
+## 🧪 Evaluation
 
-🚧 Actively being built. Currently supports single-document PDF Q&A with a basic local UI. Planned next steps include multi-document support and improved retrieval tuning.
+The `evaluation/` folder contains a small test set (`questions.json`) and a script (`evaluate.py`) for checking answer quality during development.
 
-## License
+**Note:** The evaluator uses simple word-overlap matching, so it can mark semantically correct answers as wrong. It also hit Groq's daily token limit during testing, which produced HTTP 429 errors. The scores it reports are not a reliable measure of accuracy, and it is kept as a development tool, not a benchmark.
 
-MIT
+## ⚠️ Limitations
+
+- Answers depend on the quality of text extraction, so scanned PDFs without a text layer aren't supported (no OCR).
+- Groq's free tier has daily token limits, so heavy use can return rate-limit errors.
+- Ollama must be running locally for embeddings.
+
+## 🔮 Future Improvements
+
+- [ ] OCR support for scanned PDFs
+- [ ] Multi-document support
+- [ ] Better evaluation using semantic similarity or LLM-based grading
+- [ ] Chat history and follow-up questions
+- [ ] Docker support
+- [ ] React frontend
+
+## 👨‍💻 Author
+
+**Sudhanshu Singh**
+GitHub: [@shudhanshu2708](https://github.com/shudhanshu2708)
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
